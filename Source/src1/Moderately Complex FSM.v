@@ -1,6 +1,6 @@
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Header!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 Author : Neelakant Myageri
-Date   : 21 Jan 2026
+Date   : 26 Jan 2026
 Description : Two always block coding to understand and learn how to 
               implement 2 always blocks.
               1. First SEQUENTIAL always block is used for state management
@@ -49,63 +49,101 @@ end
 always @(*) begin
       nextstate = 10'b0;
 	  y1        = 1'b0;
-	  
+	  y2        = 1'b0;
+	  y3        = 1'b0;
+
 	  case(1'b1)
 	    //Output follows default state
 		//&& - Bitwise AND
-	    state[S0] : begin 
+	    state[S0] : begin
+                        y1 = 1'b0;		
+                        y2 = 1'b0;
+                        y3 = 1'b0;
 		                if(go && !jmp) nextstate[S1] = 1'b1;
 		                else if(go && jmp) nextstate[S3] = 1'b1;
 					    else nextstate[S0] = 1'b1;
 		            end
 		//Output follows default state
 		state[S1] : begin
+		                y1 = 1'b0;		
+                        y2 = 1'b0;
+                        y3 = 1'b0;
 		                if(jmp) nextstate[S3] = 1'b1;
 		                else nextstate[S2] = 1'b1;
 		            end
 		//Output follows default state
 		state[S2] : begin 
+		                y1 = 1'b0;		
+                        y2 = 1'b0;
+                        y3 = 1'b0;
 		                nextstate[S3] = 1'b1;
 		            end
 		//Asynchronous output update
 		state[S3] : begin 
-                   		y1 = 1'b1;
+		                y1 = 1'b1;		
+                        y2 = 1'b1;
+                        y3 = 1'b0;
 		                if(jmp) nextstate[S3] = 1'b1;
 		                else nextstate[S4] = 1'b1;
                     end
 		//Output follows default state
 		state[S4] : begin
+		                y1 = 1'b0;		
+                        y2 = 1'b0;
+                        y3 = 1'b0;
 		                if(jmp) nextstate[S3] = 1'b1;
-		                else nextstate[S5] = 1'b1;
+		                else if (!sk0 && !jmp) nextstate[S5] = 1'b1;
 		            end
 		//Output follows default state
-		state[S5] : begin
-                 		if(jmp) nextstate[S3] = 1'b1;
-		                else nextstate[S6] = 1'b1;
+		state[S5] : begin 
+		                y1 = 1'b0;		
+                        y2 = 1'b0;
+                        y3 = 1'b0;
+		                if(jmp) nextstate[S3] = 1'b1;
+		                else if (!sk0 && !sk1 && !jmp) nextstate[S6] = 1'b1;
+		                else if (sk0 && !sk1 && !jmp) nextstate[S7] = 1'b1;
+		                else if (!sk0 && sk1 && !jmp) nextstate[S8] = 1'b1;
+		                else if (sk0 && sk1 && !jmp) nextstate[S9] = 1'b1;
+						else nextstate[S5] = 1'b1;
 		            end
 		//Output follows default state
-		state[S6] : begin
+		state[S6] : begin 
+		                y1 = 1'b1;		
+                        y2 = 1'b1;
+                        y3 = 1'b1;
 		                if(jmp) nextstate[S3] = 1'b1;
-		                else nextstate[S7] = 1'b1;
+		                else if(go && !jmp) nextstate[S7] = 1'b1;
+						else nextstate[S6] = 1'b1;
 		            end
 		//Output follows default state
 		state[S7] : begin
+                        y1 = 1'b0;		
+                        y2 = 1'b0;
+                        y3 = 1'b1;
 		                if(jmp) nextstate[S3] = 1'b1;
 		                else nextstate[S8] = 1'b1;
 					end
 		//Output follows default state
 		state[S8] : begin
+                        y1 = 1'b0;		
+                        y2 = 1'b1;
+                        y3 = 1'b1;
 		                if(jmp) nextstate[S3] = 1'b1;
 		                else nextstate[S9] = 1'b1;
 					end
         //Output assignment as per 2 always block mechanism.	
 		state[S9] : begin 
-		                y1 = 1'b1;  
+				        y1 = 1'b1;		
+                        y2 = 1'b1;
+                        y3 = 1'b1;
 		                if(jmp) nextstate[S3] = 1'b1;
 		                else nextstate[S7] = 1'b1;
 					end
 		//Safety Recovery
 		default   : begin
+		                y1 = 1'b0;		
+                        y2 = 1'b0;
+                        y3 = 1'b0;
 		                nextstate[S0] = 1'b0;
 		            end
 	  endcase
