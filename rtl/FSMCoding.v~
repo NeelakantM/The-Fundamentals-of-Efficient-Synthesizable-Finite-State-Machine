@@ -44,7 +44,7 @@ output reg gnt
 	   nextstate = BBUSY;
         else
            nextstate = IDLE;
-        end
+         end
              
        BBUSY : begin
          gnt = 1'b1;
