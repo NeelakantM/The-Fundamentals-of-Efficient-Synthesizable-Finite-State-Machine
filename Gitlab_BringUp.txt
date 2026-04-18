@@ -1,0 +1,33 @@
+🔹 Step 1: Check if SSH key exists
+ls ~/.ssh
+
+Look for:
+id_ed25519
+id_ed25519.pub
+
+or
+id_rsa
+id_rsa.pub
+
+🔹 Step 2: Create SSH key (if missing)
+ssh-keygen -t ed25519 -C "your_email@example.com"
+
+Press Enter for all prompts.
+
+🔹 Step 3: Start SSH agent
+eval "$(ssh-agent -s)"
+
+🔹 Step 4: Add key to agent
+ssh-add ~/.ssh/id_ed25519
+
+🔹 Step 5: Add SSH key to GitHub
+cat ~/.ssh/id_ed25519.pub
+
+Copy output →
+GitHub → Settings → SSH and GPG keys → New SSH key → Paste
+
+🔹 Step 6: Test connection
+ssh -T git@github.com
+
+Expected:
+Hi USERNAME! You've successfully authenticated...
