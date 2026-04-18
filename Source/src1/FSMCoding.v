@@ -1,7 +1,6 @@
-//Declare Module I/Os
 module FSM_Coding(
 input clk,rst_in,
-input dly,done,dly,rqst,
+input dly,done,rqst,
 output reg gnt
 );
 
@@ -56,12 +55,13 @@ reg [1:0] state, nextstate;
          else
            nextstate = BFREE;
          end
-       BFREE : 
+       BFREE :begin 
          if(req)
              nextstate = BFREE;
          else
              nextstate = BWAIT;
-      
+         end 
+
        Default :
          gnt = 1'b0;
          nextstate = IDLE; 
