@@ -1,7 +1,7 @@
-/* Date   	: 18/04/2026
-*  Author 	: Neelakant Myageri
-*  Description 	: Bus transaction handling
-*  Purpose     	: To lear Verilog coding*/
+/* Date     : 18/04/2026
+*  Author   : Neelakant Myageri
+*  Description  : Bus transaction handling
+*  Purpose      : To lear Verilog coding*/
 module FSM_Coding(
 //Master Input Signals
 input clk,rst_in,
@@ -13,9 +13,9 @@ output reg gnt
 
   //Declare FSM States in Binary Coding
   parameter [1:0] IDLE = 2'b00,
-    		BBUSY = 2'b01,
-		BWAIT = 2'b10,
-		BFREE = 2'b11;
+                  BBUSY = 2'b01,
+                  BWAIT = 2'b10,
+                  BFREE = 2'b11;
 
   //Declare State transition registers
   reg [1:0] state, nextstate;
@@ -41,7 +41,7 @@ output reg gnt
     case(state)
        IDLE : begin
         if(rqst)
-	   nextstate = BBUSY;
+       nextstate = BBUSY;
         else
            nextstate = IDLE;
         end
