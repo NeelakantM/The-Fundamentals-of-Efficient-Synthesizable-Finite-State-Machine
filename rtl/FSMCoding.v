@@ -32,11 +32,12 @@ reg [1:0] state, nextstate;
        highlights in the case statement exactly in which states the individual output(s) change).*/
        nextstate = 2'bX;
        
-       IDLE : 
+       IDLE : begin
          if(rqst)
            nextstate = BBUSY;
          else
            nextstate = IDLE;
+         end
              
        BBUSY : begin
          gnt = 1'b1;
