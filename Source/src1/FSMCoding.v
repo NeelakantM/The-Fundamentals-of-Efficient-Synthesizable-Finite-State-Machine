@@ -16,7 +16,7 @@ reg [1:0] state, nextstate;
   //Always block for state transition management. 
   //The sequential always block is coded using nonblocking assignments
   always@(posedge clk) begin
-    if(!rst)
+    if(!rst_in)
          state = IDLE;
     else
          state = nextstate;
@@ -30,7 +30,7 @@ reg [1:0] state, nextstate;
        /*Default output assignments are made before coding the case statement (this eliminates latches and
        reduces the amount of code required to code the rest of the outputs in the case statement and
        highlights in the case statement exactly in which states the individual output(s) change).*/
-       nextstate = 2'bx;
+       nextstate = 2'bX;
        
        IDLE : 
          if(rqst)
