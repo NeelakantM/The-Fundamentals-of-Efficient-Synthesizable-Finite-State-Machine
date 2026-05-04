@@ -9,7 +9,7 @@ TB_DIR   = tb
 SIM_DIR  = sim
 BUILD_DIR = $(SIM_DIR)/build
 WAVE_DIR  = $(SIM_DIR)/waveforms
-MODULE_NAME = OneHot_FSM
+MODULE_NAME = checkbit_calc
 
 # Files
 TOP      = $(MODULE_NAME)_tb
@@ -33,7 +33,7 @@ compilesrc:
 	$(IVERILOG) -o sim.out $(RTL_SRCS)
 
 # Run simulation
-run: compile
+run: compiletb
 	$(VVP) $(OUT)
 
 # View waveform
