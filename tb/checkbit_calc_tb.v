@@ -118,6 +118,14 @@ encoder_raw_data_ready_i = 1'b1;
 encoder_raw_data_ready_i = 1'b1;
 #100 encoder_raw_data_ready_i = 1'b0;
 
+//Incorrect Checkbit Data
+#100 encoder_data_i = 16'hBFBD;
+encoder_raw_data_ready_i = 1'b1;
+#100 encoder_raw_data_ready_i = 1'b0;
+
+#100 encoder_data_i = 16'hAFBC;
+encoder_raw_data_ready_i = 1'b1;
+#100 encoder_raw_data_ready_i = 1'b0;
 end 
 
 //Monitor each input and output

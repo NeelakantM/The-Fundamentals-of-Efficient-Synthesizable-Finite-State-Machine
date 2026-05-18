@@ -44,4 +44,7 @@ wave:
 clean:
 	rm -rf $(SIM_DIR)
 
+build:	compiletb run wave
+
+
 .PHONY: all compile run wave clean

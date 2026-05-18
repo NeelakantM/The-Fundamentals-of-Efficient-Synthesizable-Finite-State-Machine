@@ -17,7 +17,7 @@ output reg checkBit_Error_o
 );
 
 //Internal Constants
-parameter integer ccw_to_cw_position_conversion_c = 4095;
+localparam integer ccw_to_cw_position_conversion_c = 4095;
 localparam integer ENCODER_VALUE_ST = 0,
 		   CHECK_BIT_CALC_ST = 1,
 		   VALIDATE_RESULT_ST = 2;
@@ -26,9 +26,7 @@ reg [2:0] state, nextstate;
 reg encoder_raw_data_ready_rs;
 reg [1:0] checkbit_result_ready_rs;
 reg [11:0] data_rs;
-
-//Fall egde encoder data ready detection
-wire fe_encoder_raw_data_ready_rs;
+reg fe_encoder_raw_data_ready_rs;
 
 //1st always block - Sequential always block
 //state assignment always block, uses non-blocking
@@ -39,48 +37,37 @@ always@(posedge clk_i or negedge rst_in) begin
 	if(!rst_in) begin
 	       	state <= 3'b001;
 		encoder_raw_data_ready_rs <= 1'b0;
+		fe_encoder_raw_data_ready_rs <= 1'b0;
 	end 
 	else begin
 		state <= nextstate;
 		//For falling edge detection,encoder_raw_data_ready_i is 
 		//delayed by a clock
 		encoder_raw_data_ready_rs <= encoder_raw_data_ready_i;
+		fe_encoder_raw_data_ready_rs <= ((~encoder_raw_data_ready_i) & (encoder_raw_data_ready_rs));
 	end
 end 
-
-//Find falling edge of encoder_data_ready input
-assign  fe_encoder_raw_data_ready_rs = ((~encoder_raw_data_ready_i) & (encoder_raw_data_ready_rs));
 
 //Function to compute the checkbit result
 function [1:0] CheckbitResult;
 	input [15: 0] data;     //Input received data
-	reg odd_parity;		//XOR of odd position bits in data
-	reg even_parity;	//XOR of even position bits in data
-	reg odd_checkbit;	//Final odd checkbit after XORing with received odd parity
-	reg even_checkbit;	//Final even checkbit after XORing with received eveb parity
 	integer i;
 	begin
 		//Initialization of signals used in the function
-		odd_parity = 1'b0;
-                even_parity = 1'b0;
-		odd_checkbit = 1'b0;
-		even_checkbit = 1'b0;
-		
+	        CheckbitResult = 2'b0;
+	        	
 		//XORing of odd position bits in received data
 		for (i = 0; i <= 6; i=i+1)
-			odd_parity = (data[i * 2 + 1] ^ odd_parity);
+                        CheckbitResult[0] = (data[i * 2 + 1] ^ CheckbitResult[0]);
 
 		//XORing of even position bits in received data
                 for (i = 0; i <= 6; i=i+1)
-                        even_parity = (data[i * 2] ^ even_parity);
+                        CheckbitResult[1] = (data[i * 2] ^ CheckbitResult[1]);
 
 		//Odd Parity final check
-		odd_checkbit  = ((!odd_parity) ^ data[15]);
+		CheckbitResult[0]  = ((!CheckbitResult[0]) ^ data[15]);
 		//Even Parity final check
-		even_checkbit = ((!even_parity) ^ data[14]);
-		
-		//Concate even and odd parity
-		CheckbitResult = {odd_checkbit,even_checkbit};
+		CheckbitResult[1] = ((!CheckbitResult[1]) ^ data[14]);
 	end 
 endfunction
 
@@ -97,9 +84,9 @@ always@(*) begin
 		     //Upon falling edge of the encoder data ready, check
 		     //whether encoder data is non-zero.
                      if((fe_encoder_raw_data_ready_rs == 1'b1) && (encoder_data_i != 0)) 
-			     nextstate[CHECK_BIT_CALC_ST] = 1'b1;
+			 nextstate[CHECK_BIT_CALC_ST] = 1'b1;
 		     else
-			     nextstate[ENCODER_VALUE_ST] = 1'b1;
+		         nextstate[ENCODER_VALUE_ST] = 1'b1;
 		end
 
 		state[CHECK_BIT_CALC_ST] : begin
@@ -107,11 +94,11 @@ always@(*) begin
 		end 
 
 		state[VALIDATE_RESULT_ST] : begin
-			nextstate[ENCODER_VALUE_ST] = 1'b1;
+		     nextstate[ENCODER_VALUE_ST] = 1'b1;
 		end 
 
 		default: begin
-			nextstate = 3'b000;
+		    nextstate = 3'b001;
 		end 
 	endcase 
 end
@@ -132,22 +119,24 @@ always @(posedge clk_i or negedge rst_in) begin
 	end 
 	else begin
 		//Default condition
+		//Checkbit checked data mapped to output
 		cw_position_counts_o <= data_rs;
-		ccw_position_counts_o <= (4095 - data_rs);
+		//Convert CW position count to counter clockwise position
+		//count
+		ccw_position_counts_o <= (ccw_to_cw_position_conversion_c - data_rs);
+                //Default condition
 		data_ready_o <= 1'b0;
 	        checkBit_Error_o <= 1'b0;
          	checkBit_NoError_o <= 1'b0;
-            	checkbit_result_o <= 2'b00;
-		checkbit_result_ready_rs <= 2'b0;
 
 		case(1'b1) 
-			nextstate[CHECK_BIT_CALC_ST] : begin
+			state[CHECK_BIT_CALC_ST] : begin
 			     //Call checkbit computation function to verify
 			     //whether encoder received data is intact.
 			     //as well report the computed checkbit value
 			     checkbit_result_ready_rs <= CheckbitResult(encoder_data_i);
 			end 
-			nextstate[VALIDATE_RESULT_ST] : begin
+			state[VALIDATE_RESULT_ST] : begin
 			     //Ensure checkbit result is 0 to confirm no parity
 			     //error, then copy the position value for further
 			     //processing.
